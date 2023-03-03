@@ -1,0 +1,43 @@
+/*
+* Theme Name: GFX Timber Based Theme
+* Description: New Theme for GFX based on the timber framework
+* Author: Dinesh Lalvani
+*/
+body {
+  font-family: "proxima-nova-alt", sans-serif !important; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "proxima-nova-alt", sans-serif !important;
+  text-transform: uppercase !important; }
+
+.gfx-footer-header {
+  font-size: 120%;
+  color: #2ea3f2 !important;
+  font-weight: bold; }
+
+#site-header #wrapper-primary-navigation {
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.5); }
+
+.hdr-logo-link img {
+  max-height: 32px; }
+
+.admin-bar #site-header .uk-position-top {
+  top: 32px; }
+
+#nav-primary-desktop > li > a {
+  color: white; }
+
+#nav-primary-desktop .current-menu-item {
+  font-weight: bold; }
+
+.gfx-workout-excerpt {
+  color: white;
+  text-align: center; }
+
+.gfx-page-header .gfx-page-title h1 {
+  text-transform: uppercase;
+  font-weight: 900; }
+
+.gfx-page-header .gfx-page-excerpt {
+  font-size: 20px; }

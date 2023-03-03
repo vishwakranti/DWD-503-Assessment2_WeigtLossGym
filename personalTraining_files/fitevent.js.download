@@ -1,0 +1,182 @@
+// jshint ignore: start
+
+// Created by Utkarsh on 19th October 2016
+
+var fitevent = function() {
+	    // Checking for fitsessioncookie as this has been renewed with the utm parameters passed through Marketing team
+		var fitsessioncookie = {};
+		try{
+			var fitsessioncookie = getCookieinJSON('fitsessioncookie');
+		}catch(err){
+			fitsessioncookie = {};
+		}
+		
+		if(window.location.hostname == "fitternity.com" || window.location.hostname == "www.fitternity.com"){
+			this.url = "https://a1.fitternity.com/saveutmdata";
+		}else{
+			this.url = "https://apistage.fitn.in/saveutmdata";
+		}
+		this.params = fitsessioncookie.params !== undefined ? fitsessioncookie.params : {};
+		if(isEmpty(this.params)){
+			this.referrer = fitsessioncookie.referrer;
+			var traffic = checkTrafficType(this.referrer);
+			this.traffic_source = traffic.source;
+			this.traffic_type = traffic.type;
+		}else{
+			this.traffic_type = "inorganic";
+		}
+		// this.ga_clientId = ga.getAll()[0].get('clientId');
+		this.request = new XMLHttpRequest();
+};
+
+fitevent.prototype.pushevent = function(entity_type, entity_id) {
+	var slackrequest = new XMLHttpRequest();
+	slackrequest.open("POST", "https://hooks.slack.com/services/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", true);
+
+	
+	try {
+		//Save this data against booktrial / orders / captures
+		var fitEventData = {
+			entity_id : entity_id,
+			entity_type : entity_type,
+			// ga_clientId : this.ga_clientId,
+			utm : {
+				source : this.params.utm_source !== undefined ? this.params.utm_source : this.traffic_source,
+				medium : this.params.utm_medium,
+				campaign : this.params.utm_campaign,
+				traffic_type : this.traffic_type
+			}
+		}
+		this.request.open("POST", this.url, false);
+		this.request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		var postdata = JSON.stringify(fitEventData);
+		this.request.send(postdata);
+		
+		this.request.onerror = function(e) {			
+			var postdataslack = {"channel": "#website-down-alert", "username": "Marketing","text": "Utm Events for marketing is failing : "+e};
+			slackrequest.send(postdataslack);
+		};
+	} catch (error) {
+		var postdataslack = {"channel": "#website-down-alert", "username": "Marketing","text": "Utm Events for marketing is failing : "+error};
+		
+		slackrequest.send(JSON.stringify(postdataslack));
+	}
+};
+
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) 
+  return parts.pop().split(";").shift();
+}
+
+function getCookieinJSON(name) {
+	var stringified = getCookie(name).substring(4);
+	return JSON.parse(decodeURIComponent(stringified));
+}
+
+function checkTrafficType(referrer){
+	var traffic;
+	if(referrer != undefined){
+		if(referrer.indexOf('facebook') > -1){
+			traffic = {
+				type : "organic",
+				traffic_source : "facebook"
+			}
+			return traffic;
+		}
+		if(referrer.indexOf('google') > -1){
+			traffic = {
+				type : "organic",
+				traffic_source : "google"
+			}
+			return traffic;
+		}
+	}
+	traffic = {
+				type : "direct",
+				traffic_source : "direct"
+			}
+	return traffic;
+}
+
+
+function isEmpty(map) {
+   for(var key in map) {
+      if (map.hasOwnProperty(key)) {
+         return false;
+      }
+   }
+   return true;
+}
+
+
+// kyu.prototype.pushprofile = function(eventdata) {
+// 	try {
+// 		//function to push event to storage
+// 		eventdata.useridentifier = this.userid;
+// 		eventdata.referer = this.referer;
+// 		//document.cookie = "useremail=" + eventdata.email + "; path=/";
+// 		eventdata.sessionid = this.visitsession;
+// 		eventdata.useremail = eventdata.email;
+// 		eventdata.username = eventdata.name;
+// 		eventdata.device = this.device;
+// 		this.request.open("POST", this.url, true);
+// 		this.request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+// 		var postdata = JSON.stringify(eventdata);
+// 		this.request.send(postdata);
+// 		this.request.onerror = function(e) {
+// 			if (this.store === null) {
+// 				this.store = [];
+// 				this.store.push(eventdata);
+// 				document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 			} else {
+// 				this.store.push(eventdata);
+// 			}
+// 		};
+// 	} catch (error) {
+// 		if (this.store === null) {
+// 			this.store = [];
+// 			this.store.push(eventdata);
+// 			document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 		} else {
+// 			this.store.push(eventdata);
+// 			document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 		}
+// 	}
+// };
+
+// kyu.prototype.charged = function(eventdata) {
+// 	try {
+// 		//function to push event to storage
+// 		eventdata.useridentifier = this.userid;
+// 		eventdata.referer = this.referer;
+// 		eventdata.sessionid = this.visitsession;
+// 		eventdata.useremail = this.useremail;
+// 		eventdata.device = this.device;
+// 		this.request.open("POST", this.url, true);
+// 		this.request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+// 		var postdata = JSON.stringify(eventdata);
+// 		this.request.send(eventdata);
+// 		this.request.onerror = function(e) {
+// 			if (this.store === null) {
+// 				this.store = [];
+// 				this.store.push(eventdata);
+// 				document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 			} else {
+// 				this.store.push(eventdata);
+// 			}
+// 		};
+// 	} catch (error) {
+// 		if (this.store === null) {
+// 			this.store = [];
+// 			this.store.push(eventdata);
+// 			document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 		} else {
+// 			this.store.push(eventdata);
+// 			document.cookie = document.cookie + ';store=' + JSON.stringify(this.store);
+// 		}
+// 	}
+// };
+var fitevent = new fitevent();
+
